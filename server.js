@@ -16,9 +16,9 @@ mongoose.connect('mongodb+srv://atis-user:TeamGoatAtis@cluster0.11nwfpx.mongodb.
 
 // ✅ User-Schema mit Vorname, Nachname, Geburtstag & Rolle
 const User = mongoose.model('User', {
-  firstname: String,
-  lastname: String,
-  birthday: String,
+  vorname: String,
+  nachname: String,
+  geburtstag: String,
   email: String,
   password: String,
   role: String // "arzt" oder "patient"
@@ -35,19 +35,19 @@ const Termin = mongoose.model('Termin', {
 
 // ✅ Registrierung
 app.post('/api/register', async (req, res) => {
-  const { firstname, lastname, birthday, email, password, role } = req.body;
+  const { vorname, nachname, geburtstag, email, password, role } = req.body;
 
   const existingUser = await User.findOne({ email });
   if (existingUser) {
     return res.status(400).json({ message: 'E-Mail existiert bereits' });
   }
 
-  const user = new User({ firstname, lastname, birthday, email, password, role });
+  const user = new User({ vorname, nachname, geburtstag, email, password, role });
   await user.save();
   res.json({ message: 'Benutzer registriert' });
 });
 
-// ✅ Login (mit Profil-Infos)
+// ✅ Login – sendet "name" & "profile"
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -56,12 +56,12 @@ app.post('/api/login', async (req, res) => {
     res.json({
       success: true,
       role: user.role,
-      name: user.firstname,
+      name: user.vorname, // 👈 wichtig für dashboard welcome
       message: 'Login erfolgreich',
       profile: {
-        firstname: user.firstname,
-        lastname: user.lastname,
-        birthday: user.birthday,
+        firstname: user.vorname,
+        lastname: user.nachname,
+        birthday: user.geburtstag,
         email: user.email
       }
     });
