@@ -100,6 +100,27 @@ app.post('/api/termine/buchen', async (req, res) => {
   res.json({ message: "Termin gebucht" });
 });
 
+// ✅ Termin stornieren (Patient storniert – wird wieder "frei")
+app.post('/api/termine/stornieren', async (req, res) => {
+  const { id } = req.body;
+
+  try {
+    const termin = await Termin.findById(id);
+    if (!termin) {
+      return res.status(404).json({ message: "Termin nicht gefunden" });
+    }
+
+    termin.status = "frei";
+    termin.patient = "";
+    await termin.save();
+
+    res.json({ message: "Termin storniert" });
+  } catch (error) {
+    console.error("Fehler beim Stornieren:", error);
+    res.status(500).json({ message: "Fehler beim Stornieren" });
+  }
+});
+
 // ✅ Server starten
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server läuft auf Port ${PORT}`));
