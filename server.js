@@ -16,9 +16,9 @@ mongoose.connect('mongodb+srv://atis-user:TeamGoatAtis@cluster0.11nwfpx.mongodb.
 
 // ✅ User-Schema mit Vorname, Nachname, Geburtstag & Rolle
 const User = mongoose.model('User', {
-  vorname: String,
-  nachname: String,
-  geburtstag: String,
+  firstname: String,
+  lastname: String,
+  birthday: String,
   email: String,
   password: String,
   role: String // "arzt" oder "patient"
@@ -35,14 +35,14 @@ const Termin = mongoose.model('Termin', {
 
 // ✅ Registrierung
 app.post('/api/register', async (req, res) => {
-  const { vorname, nachname, geburtstag, email, password, role } = req.body;
+  const { firstname, lastname, birthday, email, password, role } = req.body;
 
   const existingUser = await User.findOne({ email });
   if (existingUser) {
     return res.status(400).json({ message: 'E-Mail existiert bereits' });
   }
 
-  const user = new User({ vorname, nachname, geburtstag, email, password, role });
+  const user = new User({ firstname, lastname, birthday, email, password, role });
   await user.save();
   res.json({ message: 'Benutzer registriert' });
 });
@@ -56,10 +56,13 @@ app.post('/api/login', async (req, res) => {
     res.json({
       success: true,
       role: user.role,
-      vorname: user.vorname,
-      nachname: user.nachname,
-      geburtstag: user.geburtstag,
-      email: user.email,
+      name: user.firstname,
+      profile: {
+        firstname: user.firstname,
+        lastname: user.lastname,
+        birthday: user.birthday,
+        email: user.email
+      },
       message: 'Login erfolgreich'
     });
   } else {
