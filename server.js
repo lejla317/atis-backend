@@ -14,9 +14,11 @@ mongoose.connect('mongodb+srv://atis-user:TeamGoatAtis@cluster0.11nwfpx.mongodb.
 .then(() => console.log('✅ MongoDB verbunden'))
 .catch((err) => console.error('❌ MongoDB-Verbindungsfehler:', err));
 
-// ✅ User-Schema mit Rolle
+// ✅ User-Schema mit Vorname, Nachname, Geburtstag & Rolle
 const User = mongoose.model('User', {
-  name: String,
+  firstname: String,
+  lastname: String,
+  birthday: String,
   email: String,
   password: String,
   role: String // "arzt" oder "patient"
@@ -33,19 +35,19 @@ const Termin = mongoose.model('Termin', {
 
 // ✅ Registrierung
 app.post('/api/register', async (req, res) => {
-  const { name, email, password, role } = req.body;
+  const { firstname, lastname, birthday, email, password, role } = req.body;
 
   const existingUser = await User.findOne({ email });
   if (existingUser) {
     return res.status(400).json({ message: 'E-Mail existiert bereits' });
   }
 
-  const user = new User({ name, email, password, role });
+  const user = new User({ firstname, lastname, birthday, email, password, role });
   await user.save();
   res.json({ message: 'Benutzer registriert' });
 });
 
-// ✅ Login (mit Name & Rolle zurück)
+// ✅ Login (mit Profil-Infos)
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -54,8 +56,14 @@ app.post('/api/login', async (req, res) => {
     res.json({
       success: true,
       role: user.role,
-      name: user.name,
-      message: 'Login erfolgreich'
+      name: user.firstname,
+      message: 'Login erfolgreich',
+      profile: {
+        firstname: user.firstname,
+        lastname: user.lastname,
+        birthday: user.birthday,
+        email: user.email
+      }
     });
   } else {
     res.json({ success: false, message: 'Falsche E-Mail oder Passwort' });
@@ -100,7 +108,7 @@ app.post('/api/termine/buchen', async (req, res) => {
   res.json({ message: "Termin gebucht" });
 });
 
-// ✅ Termin stornieren (Patient storniert – wird wieder "frei")
+// ✅ Termin stornieren
 app.post('/api/termine/stornieren', async (req, res) => {
   const { id } = req.body;
 
