@@ -47,7 +47,7 @@ app.post('/api/register', async (req, res) => {
   res.json({ message: 'Benutzer registriert' });
 });
 
-// ✅ Login – sendet "name" & "profile"
+// ✅ Login (mit Profil-Infos)
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -56,14 +56,11 @@ app.post('/api/login', async (req, res) => {
     res.json({
       success: true,
       role: user.role,
-      name: user.vorname, // 👈 wichtig für dashboard welcome
-      message: 'Login erfolgreich',
-      profile: {
-        firstname: user.vorname,
-        lastname: user.nachname,
-        birthday: user.geburtstag,
-        email: user.email
-      }
+      vorname: user.vorname,
+      nachname: user.nachname,
+      geburtstag: user.geburtstag,
+      email: user.email,
+      message: 'Login erfolgreich'
     });
   } else {
     res.json({ success: false, message: 'Falsche E-Mail oder Passwort' });
